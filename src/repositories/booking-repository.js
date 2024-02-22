@@ -3,7 +3,7 @@ const { ValidationErrors, AppErrors } = require("../errors");
 const { Booking } = require("../models");
 
 class BookingRepository {
-  async create() {
+  async create(data) {
     try {
       const booking = await Booking.create(data);
       return booking;
@@ -14,8 +14,8 @@ class BookingRepository {
         throw new AppErrors(
             "RepositoryError",
             "Cannot Create a Booking",
+            StatusCodes.INTERNAL_SERVER_ERROR,
             "Internal Server Error",
-            StatusCodes.INTERNAL_SERVER_ERROR
         )
     }
   }
@@ -24,7 +24,19 @@ class BookingRepository {
 
   async getAll() {}
 
-  async update() {}
+  async update(id , payload) {
+    let criteria = {id: id};
+    let returning  =["*"]
+    const updatedFlight = await Booking.update(payload,{
+      where:criteria,
+      returning: returning
+    })
+    if(updatedFlight[1] === 1){
+      const flight = await Booking.findByPk(id);
+      return flight;
+    }
+    return;
+  }
 
   async delete() {}
 }
