@@ -8,5 +8,6 @@ router.get('/', (req,res)=>{
 })
 
 router.post('/booking', BookingController.create);
+router.patch('/booking/:id', BookingController.update);
 
 module.exports = router; 

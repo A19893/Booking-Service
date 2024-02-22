@@ -20,7 +20,10 @@ class BookingRepository {
     }
   }
 
-  async get() {}
+  async get(bookingId) {
+      const response = await Booking.findByPk(bookingId);
+      return response;
+  }
 
   async getAll() {}
 
