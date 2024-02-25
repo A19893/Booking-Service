@@ -20,6 +20,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "amqplib": "^0.10.3",
     "axios": "^1.6.7",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.9",
