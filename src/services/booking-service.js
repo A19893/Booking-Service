@@ -1,10 +1,9 @@
 const { StatusCodes } = require("http-status-codes");
-const { FLIGHT_SERVICE_PATH } = require("../config/serverConfig");
+const { FLIGHT_SERVICE_PATH, REMINDER_SERVICE_PATH } = require("../config/serverConfig");
 const ServiceError = require("../errors/serviceErrors");
 const { BookingRepository } = require("../repositories");
-const axios = require("axios");
-const ValidationError = require("../errors/validationError");
-const AppError = require("../errors/appError");
+const axios = require("axios")
+const schedule  = require("node-schedule")
 class BookingService {
   constructor() {
     this.bookingRepository = new BookingRepository();
@@ -26,13 +25,22 @@ class BookingService {
         const totalCost = priceOfFlight * data.noOfSeats;
         const bookingPayload = { ...data, totalCost };
         const booking = await this.bookingRepository.create(bookingPayload);
-        const updateFlighRequestUrl = `${FLIGHT_SERVICE_PATH}/api/v1/flights/${flightId}`;
-        await axios.patch(updateFlighRequestUrl, {
-          totalSeats: flightData.totalSeats - booking.noOfSeats,
-        });
-        const updatedBooking = await this.bookingRepository.update(booking.id, {
-          status: "Booked",
-        });
+        const updateFlighRequestUrl = `${FLIGHT_SERVICE_PATH}/api/v1/flights/${flightId}`
+        await axios.patch(updateFlighRequestUrl, {totalSeats: flightData.totalSeats - booking.noOfSeats});
+        const updatedBooking = await this.bookingRepository.update(booking.id, {status: "Booked"});
+        const departureDate = new Date(flightData.departureTime)
+        let reminderDate = departureDate - 48* 60 * 60* 1000;
+        let onBoardingDate = departureDate - 24* 60 * 60* 1000;
+        reminderDate = new Date(reminderDate);
+        onBoardingDate = new Date(onBoardingDate)
+        const reminderJob = schedule.scheduleJob(reminderDate , async() =>{
+          const reminderFlightUrl = `${REMINDER_SERVICE_PATH}/api/v1/reminder-email`
+          await axios.post(reminderFlightUrl,{from : "yasharora2678@gmail.com", to: "yash.1138@zenmonk.tech" , mailSubject:"Flight after 48 hours", mailBody:"You have a flight to onboard after 48 hours"} );
+        })
+        const onBoardingJob =  schedule.scheduleJob(onBoardingDate , async() =>{
+         const reminderFlightUrl = `${REMINDER_SERVICE_PATH}/api/v1/reminder-email`
+         await axios.post(reminderFlightUrl,{from : "yasharora2678@gmail.com", to: "yash.1138@zenmonk.tech" , mailSubject:"Flight after 48 hours", mailBody:"You have a flight to onboard after 48 hours"} );
+       })
         return updatedBooking;
       }
     } catch (error) {
