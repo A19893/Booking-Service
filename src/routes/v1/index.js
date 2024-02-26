@@ -9,5 +9,6 @@ router.get('/', (req,res)=>{
 
 router.post('/booking', BookingController.create);
 router.patch('/booking/:id', BookingController.update);
+router.post('/booking/publish', BookingController.sendMessageToQueue)
 
 module.exports = router; 
