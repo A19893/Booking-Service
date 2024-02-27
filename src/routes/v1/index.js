@@ -9,6 +9,9 @@ router.get('/', (req,res)=>{
 
 router.post('/booking', BookingController.create);
 router.patch('/booking/:id', BookingController.update);
+router.get('/home', async(req,res)=>{
+    res.json("Successfully hitted booking Service")
+})
 router.post('/booking/publish', BookingController.sendMessageToQueue)
 
 module.exports = router; 
